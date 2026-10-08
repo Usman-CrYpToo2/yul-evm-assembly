@@ -6,6 +6,7 @@ contract readSmallArray {
 
       function getIndexVal(uint256 index) external view returns(uint16 val) {
            assembly {
+               if iszero(lt(index, 3)) { revert(0, 0) } // arr has 3 elements
                let arraySlot := arr.slot
             let  slot := sload(arraySlot)
                 
@@ -13,7 +14,8 @@ contract readSmallArray {
 
              let getIndexOffset := mul(offset, index)
 
-             val := shr(getIndexOffset, slot)
+             // shifting leaves the higher elements in the upper bits, so mask to 16 bits
+             val := and(shr(getIndexOffset, slot), 0xffff)
 
            }
       }

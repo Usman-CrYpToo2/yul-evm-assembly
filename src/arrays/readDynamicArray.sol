@@ -18,6 +18,7 @@ contract readingDynamicArray {
            uint256 slot ;
            assembly {
               slot := arr.slot
+              if iszero(lt(index, sload(slot))) { revert(0, 0) } // slot holds the length
            }
 
            bytes32 location = keccak256(abi.encode(slot)); // this will return the Location of First Value in array

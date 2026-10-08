@@ -26,7 +26,8 @@ contract byteTobool{
      function bytes32TOBoolTrue () pure external returns(bool){
          bool byte_bool;
             
-         bytes32 rTrue = "0x1";  
+         // "0x1" in quotes would be the text 0x1, not the number 1
+         bytes32 rTrue = bytes32(uint256(1));  
 
          assembly {
               byte_bool := rTrue

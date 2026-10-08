@@ -6,6 +6,7 @@ contract readArray {
      
      function getSlot(uint index) external view returns(bytes32 slot){
          assembly{
+            if iszero(lt(index, 5)) { revert(0, 0) } // arr has 5 elements
             let arrSlot := arr.slot
             let slotno := add(arrSlot, index)
             slot := sload(slotno)
@@ -14,6 +15,7 @@ contract readArray {
 
      function getIndexValue(uint index) external view returns(uint256 val) {
            assembly {
+               if iszero(lt(index, 5)) { revert(0, 0) } // arr has 5 elements
                let arraySlot := arr.slot
                
                let indexSlot := add(arraySlot,index)

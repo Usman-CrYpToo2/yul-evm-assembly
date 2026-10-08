@@ -19,15 +19,21 @@ contract switchs{
                   ans := mul(x,y)
               }
 
+              // x and y are signed, so use sdiv and smod. Plain div and mod
+              // read a negative number as a huge positive one.
+              // The EVM returns 0 on division by zero, so revert explicitly.
               case 4 {
-                  if and( gt(x, 0), gt(y,0) ) {
-                       ans := div(x, y)
-                  }
+                  if iszero(y) { revert(0, 0) }
+                  ans := sdiv(x, y)
               }
 
               case 5{
-                  ans := mod(x, y)
+                  if iszero(y) { revert(0, 0) }
+                  ans := smod(x, y)
+              }
 
+              default {
+                  revert(0, 0)
               }
     }
 

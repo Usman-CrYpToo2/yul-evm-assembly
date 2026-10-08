@@ -94,7 +94,8 @@ contract writingInSlot {
 
                    let leftShiftnewE := shl(mul(Eoffset, 8), _Enew)
 
-                   let clearE := 0x00fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+                   // 64 hex digits: clears only the top byte (E), keeps D intact
+                   let clearE := 0x00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
                    let clearEslot := and (clearE, Eslot)
 
                    let newValue := or(clearEslot, leftShiftnewE)

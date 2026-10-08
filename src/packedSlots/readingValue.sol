@@ -23,7 +23,8 @@ contract readingValue {
 
              let offsetInBits := mul(Aoffset, 8) // 0 x 8 = 0
 
-             Aval := shr(offsetInBits, Aslot)  // 0x0000000300000000000000000000000200000000000000000000000000000001
+             // B and C sit in the upper bits too, so mask to A's 16 bytes
+             Aval := and(shr(offsetInBits, Aslot), 0xffffffffffffffffffffffffffffffff)  // 0x0000000300000000000000000000000200000000000000000000000000000001
          }
      }
 
@@ -34,7 +35,8 @@ contract readingValue {
 
              let offsetInBits := mul(Boffset, 8)
 
-             Bval := shr(offsetInBits, Bslot)
+             // C sits above B, so mask to B's 12 bytes
+             Bval := and(shr(offsetInBits, Bslot), 0xffffffffffffffffffffffff)
          }
      }
 
