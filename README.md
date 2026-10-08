@@ -4,9 +4,6 @@
 
 Minimal contracts covering EVM storage layout and control flow in inline assembly (Yul). Each contract isolates a single concept and is covered by a Foundry test.
 
-> [!WARNING]
-> Educational code. Unaudited and not intended for deployment.
-
 ## Contents
 
 All sources are under [`src/`](src).
@@ -52,6 +49,10 @@ A self-review of this codebase found 7 issues (2 high, 1 medium, 3 low, 1 inform
 - Assembly `add`, `sub`, and `mul` wrap on overflow; checked arithmetic is a Solidity-level feature.
 - `writeInSlot.onlyWorkWith2256` intentionally overwrites a full packed slot to demonstrate the effect on co-located variables.
 - `bytesToString.returnStringWrong` intentionally reverts: assigning a string literal in assembly sets the memory pointer, not the contents.
+
+## Safety
+
+Not audited by a third party. Provided as is, without warranty.
 
 ## License
 
