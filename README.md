@@ -1,6 +1,6 @@
 # Yul and EVM Assembly Notes
 
-[![test](https://github.com/Usman-CrYpToo2/yul/actions/workflows/test.yml/badge.svg)](https://github.com/Usman-CrYpToo2/yul/actions/workflows/test.yml)
+[![test](https://github.com/Usman-CrYpToo2/yul-evm-assembly/actions/workflows/test.yml/badge.svg)](https://github.com/Usman-CrYpToo2/yul-evm-assembly/actions/workflows/test.yml)
 
 Small, focused Solidity contracts that each show one idea in inline assembly (Yul): arithmetic, control flow, how storage slots are laid out, how packed variables share a slot, and how arrays are stored.
 
@@ -33,8 +33,8 @@ All contracts are in [`src/`](src), grouped by topic.
 You need [Foundry](https://book.getfoundry.sh/getting-started/installation).
 
 ```bash
-git clone --recurse-submodules https://github.com/Usman-CrYpToo2/yul.git
-cd yul
+git clone --recurse-submodules https://github.com/Usman-CrYpToo2/yul-evm-assembly.git
+cd yul-evm-assembly
 forge test
 ```
 
