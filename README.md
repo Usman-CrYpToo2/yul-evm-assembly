@@ -1,36 +1,39 @@
-# Yul and EVM Assembly Notes
+# Yul EVM Assembly
 
 [![test](https://github.com/Usman-CrYpToo2/yul-evm-assembly/actions/workflows/test.yml/badge.svg)](https://github.com/Usman-CrYpToo2/yul-evm-assembly/actions/workflows/test.yml)
 
-Small, focused Solidity contracts that each show one idea in inline assembly (Yul): arithmetic, control flow, how storage slots are laid out, how packed variables share a slot, and how arrays are stored.
+Minimal contracts covering EVM storage layout and control flow in inline assembly (Yul). Each contract isolates a single concept and is covered by a Foundry test.
 
-I wrote these in 2023 while learning Yul. In 2026 I went back over them as an auditor, added a Foundry test suite, and fixed the bugs the tests exposed. Those fixes are listed [below](#bugs-found-in-review).
+> [!WARNING]
+> Educational code. Unaudited and not intended for deployment.
 
 ## Contents
 
-All contracts are in [`src/`](src), grouped by topic.
+All sources are under [`src/`](src).
 
-| Topic | File | What it shows |
+| Topic | Source | Concept |
 |---|---|---|
-| **Basic operations** | [`basicOperations/`](src/basicOperations) | `add`, `sub`, `mul`, `div`, `mod`, `gt`, `lt`, `iszero` |
-| **Conditions** | [`conditions/if/`](src/conditions/if) | `if` blocks, and building `max` and `min` without an `else` |
-| | [`conditions/switch/switchcase.sol`](src/conditions/switch/switchcase.sol) | A signed calculator with `switch`, `sdiv`, `smod`, and a `default` that reverts |
-| **Loops** | [`loops/for.sol`](src/loops/for.sol) | A `for` loop |
-| | [`loops/while.sol`](src/loops/while.sol) | Yul has no `while`, so a `for` loop with an empty post block plays that role |
-| | [`loops/isPrime.sol`](src/loops/isPrime.sol) | Trial division with `break` |
-| **Data types** | [`dataType/`](src/dataType) | Yul has one type, the 256-bit word. Assigning words to `address`, `bool`, and `uint`, and why returning a string needs care |
-| **State variables** | [`stateVariables/`](src/stateVariables) | `.slot` to find a variable, `sload` and `sstore` to read and write it, and reading a `private` variable straight from storage |
-| **Packed slots** | [`packedSlots/offset.sol`](src/packedSlots/offset.sol) | `.offset`: where a small variable starts inside its slot |
-| | [`packedSlots/readingValue.sol`](src/packedSlots/readingValue.sol) | Reading one packed variable: shift right by its offset, then mask |
-| | [`packedSlots/returnType256.sol`](src/packedSlots/returnType256.sol) | Why the mask matters when the return type is a full `uint256` |
-| | [`packedSlots/writeInSlot.sol`](src/packedSlots/writeInSlot.sol) | Writing one packed variable without touching its neighbours: clear its bits with a mask, shift the new value in, `or` them together |
-| **Arrays** | [`arrays/readingFixedArray.sol`](src/arrays/readingFixedArray.sol), [`writeInTheFixedArray.sol`](src/arrays/writeInTheFixedArray.sol) | Fixed arrays take consecutive slots starting at `arr.slot` |
-| | [`arrays/readDynamicArray.sol`](src/arrays/readDynamicArray.sol), [`writingDynamicArray.sol`](src/arrays/writingDynamicArray.sol) | Dynamic arrays keep their length at `arr.slot` and their data at `keccak256(arr.slot)` |
-| | [`arrays/readingSmallBytesArray.sol`](src/arrays/readingSmallBytesArray.sol) | Small elements (`uint16`) are packed several to a slot |
+| Arithmetic and comparison | [`basicOperations/`](src/basicOperations) | `add`, `sub`, `mul`, `div`, `mod`, `gt`, `lt`, `iszero` |
+| Conditionals | [`conditions/if/`](src/conditions/if) | `if` without `else`; `max` and `min` |
+| | [`conditions/switch/switchcase.sol`](src/conditions/switch/switchcase.sol) | Signed arithmetic with `switch`, `sdiv`, `smod`, and a reverting `default` |
+| Loops | [`loops/`](src/loops) | `for`; `while` expressed as `for` with an empty post block; early `break` |
+| Data types | [`dataType/`](src/dataType) | The single 256-bit word type and its interpretation as `address`, `bool`, `uint256`, `bytes32` |
+| State variables | [`stateVariables/`](src/stateVariables) | `.slot`, `sload`, `sstore`; reading `private` state directly from storage |
+| Packed slots | [`packedSlots/`](src/packedSlots) | `.offset`; read with shift and mask; write with clear, shift, and `or` |
+| Arrays | [`arrays/`](src/arrays) | Fixed, dynamic, and packed (`uint16[]`) array layout |
 
-## Running the tests
+## Storage Layout Reference
 
-You need [Foundry](https://book.getfoundry.sh/getting-started/installation).
+| Layout | Location of element `i` |
+|---|---|
+| Value type at slot `p` | `p` |
+| Fixed array `T[n]` at slot `p`, 32-byte elements | `p + i` |
+| Dynamic array `T[]` at slot `p` | length at `p`; element at `keccak256(p) + i` |
+| Packed variable at slot `p`, byte offset `o`, width `w` bytes | `(sload(p) >> (8 * o)) & (2^(8w) - 1)` |
+
+## Usage
+
+Requires [Foundry](https://book.getfoundry.sh/getting-started/installation).
 
 ```bash
 git clone --recurse-submodules https://github.com/Usman-CrYpToo2/yul-evm-assembly.git
@@ -38,31 +41,42 @@ cd yul-evm-assembly
 forge test
 ```
 
-There are 31 tests in [`test/`](test), one or more for every contract.
+The suite contains 31 tests. CI runs `forge fmt --check`, `forge build`, and `forge test` on every push.
 
-## Bugs found in review
+## Security Review
 
-These are the bugs the tests caught. Each is fixed and covered by a test.
+Issues identified by the test suite and resolved in [`a079d70`](https://github.com/Usman-CrYpToo2/yul-evm-assembly/commit/a079d70). Each is covered by a regression test.
 
-| Bug | Where | What went wrong |
-|---|---|---|
-| Writing `E` corrupted `D` | `packedSlots/writeInSlot.sol` | The mask for `E` had 63 hex digits instead of 64. A short hex literal is padded on the left, so the mask cleared the top 4 bits of `D` as well as `E`. Writing `E` changed `D` from `0xF4` to `0x04`. |
-| Signed division was wrong | `conditions/switch/switchcase.sol` | The calculator takes `int` inputs but used `div` and `mod`, which are unsigned. Its "both positive" guard used `gt`, also unsigned, so negative numbers passed the guard as huge positive ones. `-7 / 2` returned about 5.8 × 10^76. Fixed with `sdiv` and `smod`. |
-| Division by zero returned 0 | `conditions/switch/switchcase.sol` | The EVM returns 0 instead of reverting. Solidity would revert, so the assembly now does too. |
-| Unknown operation returned 0 | `conditions/switch/switchcase.sol` | No `default` case. It now reverts. |
-| Writing past a fixed array | `arrays/writeInTheFixedArray.sol` | No bounds check, so index 5 of a `uint256[5]` wrote into storage slot 5, which belongs to whatever variable comes next. |
-| Reading past arrays | `arrays/readingFixedArray.sol`, `readDynamicArray.sol`, `readingSmallBytesArray.sol` | Out-of-range reads returned neighbouring storage, or 0, instead of reverting. |
-| Packed reads not masked | `arrays/readingSmallBytesArray.sol`, `packedSlots/readingValue.sol` | After shifting, the other packed values were still in the upper bits. The ABI encoder happened to clean them on return, but assembly should not rely on that. |
-| Wrong `bool` source | `dataType/bool.sol` | `bytes32 rTrue = "0x1"` is the text `0x1`, not the number 1. |
+| ID | Severity | Title | Location |
+|---|---|---|---|
+| H-01 | High | Out-of-bounds write corrupts adjacent storage | `arrays/writeInTheFixedArray.sol` |
+| H-02 | High | Clear mask for `E` also clears the upper nibble of `D` | `packedSlots/writeInSlot.sol` |
+| M-01 | Medium | Unsigned `div` and `mod` applied to signed operands | `conditions/switch/switchcase.sol` |
+| L-01 | Low | Out-of-bounds reads return adjacent storage or zero | `arrays/*.sol` |
+| L-02 | Low | Division by zero and unknown operations return zero | `conditions/switch/switchcase.sol` |
+| L-03 | Low | Packed values returned without masking | `arrays/readingSmallBytesArray.sol`, `packedSlots/readingValue.sol` |
+| I-01 | Info | `bool` source initialised from a string literal | `dataType/bool.sol` |
 
-Also removed: a duplicate `conditions/iszero.sol` that never assigned its return value.
+**H-01.** `writeInArray` stored at `arr.slot + index` with no bound, so `index >= 5` wrote into slots owned by subsequent state variables. *Fix:* revert when `index >= 5`.
+
+**H-02.** The mask was a 63-digit literal, which the compiler left-pads to `0x000fff...`. Clearing with it zeroed bits 244 to 255, covering `E` and the upper nibble of `D`. Writing `E` changed `D` from `0xF4` to `0x04`. *Fix:* 64-digit mask `0x00ff...ff`.
+
+**M-01.** The calculator accepts `int256` but used `div` and `mod`. The guard `and(gt(x, 0), gt(y, 0))` is also unsigned, so negative operands passed it as large positive values; `-7 / 2` returned approximately `5.79e76`. *Fix:* `sdiv` and `smod`.
+
+**L-01.** Reads past the end of fixed, dynamic, and packed arrays returned neighbouring storage or zero instead of reverting. *Fix:* bounds checks against the declared length or the stored length.
+
+**L-02.** The EVM returns zero on division by zero, and the `switch` had no `default`. *Fix:* explicit reverts for both.
+
+**L-03.** After `shr`, neighbouring packed values remained in the upper bits. Results were correct only because the ABI encoder cleans return values. *Fix:* mask to the variable's width.
+
+**I-01.** `bytes32 rTrue = "0x1"` encodes the ASCII string `0x1`, not the integer `1`. *Fix:* `bytes32(uint256(1))`.
 
 ## Notes
 
-- `add`, `sub`, and `mul` in assembly wrap around on overflow instead of reverting. That is expected, and the reason Solidity 0.8 adds checks around them.
-- `writeInSlot.onlyWorkWith2256` deliberately writes a full word into a packed slot, to show how that wipes every variable sharing it.
-- `bytes32ToString.returnStringWrong` deliberately fails, to show that a string literal assigned in assembly becomes a memory pointer, not a string.
+- Assembly `add`, `sub`, and `mul` wrap on overflow; checked arithmetic is a Solidity-level feature.
+- `writeInSlot.onlyWorkWith2256` intentionally overwrites a full packed slot to demonstrate the effect on co-located variables.
+- `bytesToString.returnStringWrong` intentionally reverts: assigning a string literal in assembly sets the memory pointer, not the contents.
 
 ## License
 
-MIT, see [LICENSE](LICENSE).
+MIT, see [`LICENSE`](LICENSE).
