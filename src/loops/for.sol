@@ -1,15 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >= 0.7.0;
+pragma solidity >=0.7.0;
 
-contract forLoop{
-    function implementFor() pure external returns(uint sum) {
+contract forLoop {
+    function implementFor() external pure returns (uint256 sum) {
         assembly {
-            
-            for {let i := 0} lt(i, 10) {i := add(i,1)} {
+            for { let i := 0 } lt(i, 10) { i := add(i, 1) } {
                 sum := add(sum, i)
             }
-     
-
         }
     }
 }

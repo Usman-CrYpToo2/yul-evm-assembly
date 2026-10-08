@@ -11,7 +11,9 @@ import {readSmallArray as ReadSmallArray} from "../src/arrays/readingSmallBytesA
 contract ArraysTest is Test {
     function test_readFixedArray() public {
         ReadFixedArray a = new ReadFixedArray();
-        for (uint256 i; i < 5; i++) assertEq(a.getIndexValue(i), i + 1);
+        for (uint256 i; i < 5; i++) {
+            assertEq(a.getIndexValue(i), i + 1);
+        }
     }
 
     function test_readFixedArray_outOfBoundsReverts() public {
@@ -38,7 +40,9 @@ contract ArraysTest is Test {
     function test_readDynamicArray() public {
         ReadDynamicArray a = new ReadDynamicArray();
         assertEq(a.getArraySlot(), 5, "slot holds the length");
-        for (uint256 i; i < 5; i++) assertEq(a.readingTheValue(i), i + 1);
+        for (uint256 i; i < 5; i++) {
+            assertEq(a.readingTheValue(i), i + 1);
+        }
     }
 
     function test_readDynamicArray_outOfBoundsReverts() public {

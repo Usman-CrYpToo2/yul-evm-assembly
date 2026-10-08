@@ -1,112 +1,107 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >= 0.7.0;
-
+pragma solidity >=0.7.0;
 
 contract writingInSlot {
-      uint128 public A  = 1; // 16 bytes
-      uint96 public B = 2; // 12 bytes
-      uint16 public C = 3;
-      uint8 public D = 4;
-      bool public E = true;
+    uint128 public A = 1; // 16 bytes
+    uint96 public B = 2; // 12 bytes
+    uint16 public C = 3;
+    uint8 public D = 4;
+    bool public E = true;
 
-      function onlyWorkWith2256(uint _num) external {
-          assembly {
-               let Cslot := C.slot
-               sstore(Cslot, _num)  // not going to work with the anyother data type;
-          }
-      }
+    function onlyWorkWith2256(uint256 _num) external {
+        assembly {
+            let Cslot := C.slot
+            sstore(Cslot, _num) // not going to work with the anyother data type;
+        }
+    }
 
-      function writeInAslot(uint128 _Anew) external {
-           assembly {
-                let Aslot := sload(A.slot)
-                let Aoffset := A.offset
+    function writeInAslot(uint128 _Anew) external {
+        assembly {
+            let Aslot := sload(A.slot)
+            let Aoffset := A.offset
 
-                 let leftShiftNewA := shl(mul(Aoffset, 8), _Anew)
+            let leftShiftNewA := shl(mul(Aoffset, 8), _Anew)
 
-                 let clearA := 0xffffffffffffffffffffffffffffffff00000000000000000000000000000000
+            let clearA := 0xffffffffffffffffffffffffffffffff00000000000000000000000000000000
 
-                 let clearAslot := and(clearA, Aslot)
-                  
-                 let newValue := or(clearAslot, leftShiftNewA)
-              
-                 sstore(A.slot, newValue)
-           }
+            let clearAslot := and(clearA, Aslot)
 
-                   
-      }
-        
+            let newValue := or(clearAslot, leftShiftNewA)
 
-            function writeInSlotB (uint96 _Bnew) external {
-                 assembly {
-                   let  Bslot := sload(B.slot)
-                   let Boffset := B.offset // bytes
+            sstore(A.slot, newValue)
+        }
+    }
 
-                   let leftShitfNewB := shl(mul(Boffset, 8), _Bnew)
+    function writeInSlotB(uint96 _Bnew) external {
+        assembly {
+            let Bslot := sload(B.slot)
+            let Boffset := B.offset // bytes
 
-                   let clearB := 0xffffffff000000000000000000000000ffffffffffffffffffffffffffffffff
-                   
-                   let clearBslot := and(clearB, Bslot)
+            let leftShitfNewB := shl(mul(Boffset, 8), _Bnew)
 
-                   let BnewValue := or(clearBslot, leftShitfNewB)
+            let clearB := 0xffffffff000000000000000000000000ffffffffffffffffffffffffffffffff
 
-                   sstore(B.slot, BnewValue)
-                 }
-             }
+            let clearBslot := and(clearB, Bslot)
 
-             function writeInSlotC(uint16 _Cnew) external {
-                  assembly{
-                   let Cslot := sload(C.slot)
-                   let Coffset := C.offset
+            let BnewValue := or(clearBslot, leftShitfNewB)
 
-                   let leftShiftNewC := shl(mul(Coffset,8), _Cnew)
+            sstore(B.slot, BnewValue)
+        }
+    }
 
-                   let clearC := 0xffff0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff 
+    function writeInSlotC(uint16 _Cnew) external {
+        assembly {
+            let Cslot := sload(C.slot)
+            let Coffset := C.offset
 
-                   let clearCslot := and(clearC, Cslot)
+            let leftShiftNewC := shl(mul(Coffset, 8), _Cnew)
 
-                   let newValue := or(clearCslot, leftShiftNewC)
+            let clearC := 0xffff0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 
-                   sstore(C.slot, newValue)
-                }
+            let clearCslot := and(clearC, Cslot)
 
-             } 
+            let newValue := or(clearCslot, leftShiftNewC)
 
-              function writeInSlotD(uint8 _Dnew) external {
-                  assembly{
-                    let Dslot := sload(D.slot)
-                    let Doffset := D.offset
+            sstore(C.slot, newValue)
+        }
+    }
 
-                    let leftShiftD := shl(mul(Doffset, 8), _Dnew)
+    function writeInSlotD(uint8 _Dnew) external {
+        assembly {
+            let Dslot := sload(D.slot)
+            let Doffset := D.offset
 
-                    let clearD := 0xff00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff  
-                    let clearDslot := and(clearD, Dslot)
+            let leftShiftD := shl(mul(Doffset, 8), _Dnew)
 
-                    let newValue := or(clearDslot, leftShiftD)
+            let clearD := 0xff00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+            let clearDslot := and(clearD, Dslot)
 
-                    sstore(D.slot, newValue)
-                  }
-              }
+            let newValue := or(clearDslot, leftShiftD)
 
-              function writeInSlotE(bool _Enew) external {
-                  assembly{
-                   let Eslot := sload(E.slot)
-                   let Eoffset := E.offset 
+            sstore(D.slot, newValue)
+        }
+    }
 
-                   let leftShiftnewE := shl(mul(Eoffset, 8), _Enew)
+    function writeInSlotE(bool _Enew) external {
+        assembly {
+            let Eslot := sload(E.slot)
+            let Eoffset := E.offset
 
-                   // 64 hex digits: clears only the top byte (E), keeps D intact
-                   let clearE := 0x00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-                   let clearEslot := and (clearE, Eslot)
+            let leftShiftnewE := shl(mul(Eoffset, 8), _Enew)
 
-                   let newValue := or(clearEslot, leftShiftnewE)
+            // 64 hex digits: clears only the top byte (E), keeps D intact
+            let clearE := 0x00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+            let clearEslot := and(clearE, Eslot)
 
-                   sstore(E.slot, newValue)
-                  }
-              }
+            let newValue := or(clearEslot, leftShiftnewE)
 
-    function readTheSlot() external view returns(bytes32 Slot) {
-         assembly {
-              Slot := sload(0)
-         }
+            sstore(E.slot, newValue)
+        }
+    }
+
+    function readTheSlot() external view returns (bytes32 Slot) {
+        assembly {
+            Slot := sload(0)
+        }
     }
 }

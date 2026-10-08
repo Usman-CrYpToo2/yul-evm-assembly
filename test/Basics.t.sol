@@ -131,7 +131,8 @@ contract DataTypesTest is Test {
         StringType s = new StringType();
         bytes memory out = bytes(s.returnStringCorrect());
         assertEq(out.length, 32, "a bytes32 always becomes 32 bytes");
-        assertEq(bytes11(out), bytes11("hello world"));
+        // forge-lint: disable-next-line(unsafe-typecast)
+        assertEq(bytes11(out), bytes11("hello world")); // intentional: compare only the 11 text bytes
     }
 
     /// Assigning a string literal to a memory string in assembly stores the

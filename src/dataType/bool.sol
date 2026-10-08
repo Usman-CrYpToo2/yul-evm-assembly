@@ -1,52 +1,48 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >= 0.7.0;
+pragma solidity >=0.7.0;
 
-contract byteTobool{
-     
-     function returnTrue() pure external returns(bool){
-         bool  rTrue ;
+contract byteTobool {
+    function returnTrue() external pure returns (bool) {
+        bool rTrue;
 
-         assembly {
-              rTrue := 1
-         }
+        assembly {
+            rTrue := 1
+        }
 
-         return rTrue;
-     }
+        return rTrue;
+    }
 
-     function returnFalse() pure external returns(bool){
-         bool rFalse;
+    function returnFalse() external pure returns (bool) {
+        bool rFalse;
 
-         assembly {
-             rFalse := 0
-         }
+        assembly {
+            rFalse := 0
+        }
 
-         return rFalse;
-     }
+        return rFalse;
+    }
 
-     function bytes32TOBoolTrue () pure external returns(bool){
-         bool byte_bool;
-            
-         // "0x1" in quotes would be the text 0x1, not the number 1
-         bytes32 rTrue = bytes32(uint256(1));  
+    function bytes32TOBoolTrue() external pure returns (bool) {
+        bool byte_bool;
 
-         assembly {
-              byte_bool := rTrue
-         }
+        // "0x1" in quotes would be the text 0x1, not the number 1
+        bytes32 rTrue = bytes32(uint256(1));
 
-         return byte_bool;
+        assembly {
+            byte_bool := rTrue
+        }
 
-     }
+        return byte_bool;
+    }
 
-     function bytes32ToBoolFalse () pure external returns(bool) {
-          bool byte_bool;
+    function bytes32ToBoolFalse() external pure returns (bool) {
+        bool byte_bool;
 
-          bytes32 rFalse = bytes32(0);
+        bytes32 rFalse = bytes32(0);
 
-          assembly {
-               byte_bool := rFalse
-          }
-          return byte_bool;
-     }
-
-     
+        assembly {
+            byte_bool := rFalse
+        }
+        return byte_bool;
+    }
 }

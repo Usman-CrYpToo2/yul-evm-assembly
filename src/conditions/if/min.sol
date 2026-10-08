@@ -1,20 +1,19 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >= 0.7.0;
+pragma solidity >=0.7.0;
 
 contract min {
-
-    function mini () pure external returns(uint minNum) {
+    function mini() external pure returns (uint256 minNum) {
         assembly {
-             let x := 50
-             let y := 100
+            let x := 50
+            let y := 100
 
-             if lt(x, y) {
-                 minNum := x
-             }
+            if lt(x, y) {
+                minNum := x
+            }
 
-             if iszero( lt(x, y) ) {
-                 minNum := y
-             }
+            if iszero(lt(x, y)) {
+                minNum := y
+            }
         }
     }
 }

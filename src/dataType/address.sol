@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >= 0.7.0;
+pragma solidity >=0.7.0;
 
-contract byteToaddress{
+contract byteToaddress {
+    function addressDatatype() external pure returns (address) {
+        address addr;
 
-    function addressDatatype() pure external returns(address){
-         address addr;
+        assembly {
+            addr := 10
+        }
 
-         assembly {
-              addr := 10
-         }
-
-         return addr;
+        return addr;
     }
 }
